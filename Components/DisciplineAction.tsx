@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Form, Input, Select} from "antd";
+import {Button, Form, Input, message, Select} from "antd";
 import {useForm} from "antd/es/form/Form";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import Discipline from "../models/Discipline";
@@ -11,14 +11,15 @@ const DisciplineAction : React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
     const [form] = useForm();
+    const [messageApi, contextHolder] = message.useMessage();
     let [searchParams, ] = useSearchParams();
 
     useEffect(() => {
         const getDiscipline = async () => {
             const id : string | null = searchParams.get("id");
-            if (id === null) return;
+            if (!id) return;
             const disciplineL = await DisciplineReq.get(+id);
-            if (disciplineL === null) return;
+            if (disciplineL === null) return messageApi.error('You don`t have permissions!');;
             setDiscipline(mapDiscipline(disciplineL));
             form.setFieldsValue({
                 'name' : disciplineL.name
@@ -32,7 +33,10 @@ const DisciplineAction : React.FC = () => {
     const onFinish = async (value : any) => {
         setLoading(prevState => !prevState);
         if (discipline === null) {
-            await DisciplineReq.add(value.name);
+            const data = await DisciplineReq.add(value.name);
+            if (!data) {
+                return messageApi.error('You don`t have permissions!');
+            }
         } else {
             await DisciplineReq.edit({
                 id : discipline.id,
@@ -43,33 +47,36 @@ const DisciplineAction : React.FC = () => {
     }
 
     return (
-        <Form
-            form={form}
-            name="basic"
-            labelCol={{ span: 2 }}
-            wrapperCol={{ span: 16 }}
-            style={{ width: '100%' }}
-            disabled={loading}
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            autoComplete="off"
-            layout={"vertical"}
-        >
-            <h2>Discipline</h2>
-            <Form.Item
-                label="Discipline name"
-                name="name"
-                rules={[{ required: true, message: 'Please input Discipline name!' }]}
-                wrapperCol={{ span: 8 }}
+        <>
+            {contextHolder}
+            <Form
+                form={form}
+                name="basic"
+                labelCol={{ span: 2 }}
+                wrapperCol={{ span: 16 }}
+                style={{ width: '100%' }}
+                disabled={loading}
+                initialValues={{ remember: true }}
+                onFinish={onFinish}
+                autoComplete="off"
+                layout={"vertical"}
             >
-                <Input />
-            </Form.Item>
-            <Form.Item wrapperCol={{ span: 8 }}>
-                <Button type="primary" htmlType="submit">
-                    Submit
-                </Button>
-            </Form.Item>
-        </Form>
+                <h2>Discipline</h2>
+                <Form.Item
+                    label="Discipline name"
+                    name="name"
+                    rules={[{ required: true, message: 'Please input Discipline name!' }]}
+                    wrapperCol={{ span: 8 }}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item wrapperCol={{ span: 8 }}>
+                    <Button type="primary" htmlType="submit">
+                        Submit
+                    </Button>
+                </Form.Item>
+            </Form>
+        </>
     );
 };
 

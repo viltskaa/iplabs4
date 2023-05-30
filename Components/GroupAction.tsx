@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Group from "../models/Group";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import {Button, Form, Input, Select, Space} from "antd";
+import {Button, Form, Input, message, Select, Space} from "antd";
 import Student from "../models/Student";
 import {DisciplineReq, GroupReq, StudentReq} from "../utils/Requests";
 import {mapDiscipline, mapGroup, mapStudent} from "../utils/mappingUtils";
@@ -16,6 +16,7 @@ const GroupAction : React.FC = () => {
     const [disciplines, setDisciplines] = useState<Array<Discipline>>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
+    const [messageApi, contextHolder] = message.useMessage();
 
     const [form] = useForm();
     let [searchParams, ] = useSearchParams();
@@ -23,20 +24,19 @@ const GroupAction : React.FC = () => {
     useEffect(() => {
         const getGroup = async () => {
             const id : string | null = searchParams.get("id");
-            if (id !== null) {
-                const groupL = await GroupReq.get(+id);
-                if (groupL === null) return;
-                setGroup(mapGroup(groupL));
-                form.setFieldsValue({
-                    'name' : groupL.name,
-                    'disciplines' : groupL.disciplines.map(x => x.id)
-                })
-            }
+            if (!id) return;
+            const groupL = await GroupReq.get(+id);
+            if (groupL === null) return messageApi.error('You don`t have permissions!');
+            setGroup(mapGroup(groupL));
+            form.setFieldsValue({
+                'name': groupL.name,
+                'disciplines': groupL.disciplines.map(x => x.id)
+            })
         }
 
         const getDisciplines = async () => {
             const disciplinesL = await DisciplineReq.all();
-            if (disciplinesL !== null) {
+            if (disciplinesL) {
                 setDisciplines(disciplinesL.map(mapDiscipline));
             }
         }
@@ -51,7 +51,7 @@ const GroupAction : React.FC = () => {
 
     const renderSelect = () => {
         console.log(disciplines)
-        if (disciplines !== null) {
+        if (disciplines) {
             return disciplines.map(x => {
                 return {
                     label : x.name,
@@ -69,7 +69,10 @@ const GroupAction : React.FC = () => {
         setLoading(prevState => !prevState);
         if (group === null) {
             const data = await GroupReq.add(value.name);
-            if (data !== null && value.disciplines.length > 0) {
+            if (!data) {
+                return messageApi.error('You don`t have permissions!');
+            }
+            if (value.disciplines.length > 0) {
                 await GroupReq.addDisciplines(data, value.disciplines);
             }
         } else {
@@ -87,6 +90,7 @@ const GroupAction : React.FC = () => {
 
     return (
         <>
+            {contextHolder}
             <Form
                 form={form}
                 name="basic"

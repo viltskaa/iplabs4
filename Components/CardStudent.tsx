@@ -25,7 +25,7 @@ const CardStudent: React.FC<IStudentProps> = memo(({student}: IStudentProps) => 
                     messageApi.success("Student deleted successfully");
                 }
                 else {
-                    messageApi.error("Error");
+                    return messageApi.error("You don`t have permissions!");
                 }
                 navigate(0);
             },

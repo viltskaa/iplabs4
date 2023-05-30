@@ -23,9 +23,9 @@ const StudentAction : React.FC = () => {
     useEffect(() => {
         const getStudent = async () => {
             const id : string | null = searchParams.get("id");
-            if (id === null) return;
+            if (!id) return;
             const studentL = await StudentReq.get(+id);
-            if (studentL == null) return;
+            if (studentL == null) return messageApi.error('You don`t have permissions!');
             setStudent(mapStudent(studentL));
             form.setFieldsValue(
                 {
@@ -57,11 +57,11 @@ const StudentAction : React.FC = () => {
                 messageApi.success('New student added successfully');
             }
             else {
-                messageApi.error('Error');
+                messageApi.error('You don`t have permissions!');
             }
         }
         else {
-            messageApi.error('Error');
+            messageApi.error('You don`t have permissions!');
         }
     }
 

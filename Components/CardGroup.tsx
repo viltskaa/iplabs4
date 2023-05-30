@@ -25,7 +25,7 @@ const CardGroup: React.FC<IGroupProps> = memo(({group} : IGroupProps) => {
                     messageApi.success("Group deleted successfully");
                 }
                 else {
-                    messageApi.error("Error");
+                    return messageApi.error("You don`t have permissions!");
                 }
             },
             onCancel() {

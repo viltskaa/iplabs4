@@ -1,5 +1,5 @@
 import './App.css'
-import React from "react";
+import React, {useState} from "react";
 
 import BaseLayout from "../Components/BaseLayout";
 import Students from "../Components/Students";
@@ -10,6 +10,9 @@ import GroupAction from "../Components/GroupAction";
 import Disciplines from "../Components/Disciplines";
 import DisciplineAction from "../Components/DisciplineAction";
 import Report from "../Components/Report";
+import Login from "../Components/Login";
+import {getJwtToken} from "../utils/Requests";
+import Registration from "../Components/Registration";
 
 const router = createBrowserRouter([
     {
@@ -61,6 +64,16 @@ const router = createBrowserRouter([
 ]);
 
 const App : React.FC = () => {
+    const [token, setToken] = useState<String>(getJwtToken());
+
+    if (!token) {
+        return <Login setToken={setToken}/>
+    }
+
+    if (token === "reg") {
+        return <Registration setToken={setToken}/>
+    }
+
     return (
         <RouterProvider router={router}/>
     )

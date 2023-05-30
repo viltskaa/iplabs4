@@ -3,3 +3,14 @@
   margin: 0;
   box-sizing: border-box;
 }
+
+div.account {
+  position: absolute;
+  height: 64px;
+  top: 0;
+  right: 50px;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  color: white;
+  background-color: #1677ff;
+}
